@@ -28,10 +28,30 @@
 ---
 
 ## Grammar (BNF)
+<command> ::= "dump" "examples"
+            | "mkdir" <path>
+            | "touch" <path> <size>
+            | "ls" [<path>]
+            | "rm" <path>
+            | "mv" <path> "to" <path>
+            | "size" [<path>]
+            | "find" <pattern> ["in" <path>]
+            | "tree" [<path>] ["depth" <nat>]
+            | "show" <path>
 
+<path> ::= <name> { "/" <name> }
+<name> ::= <identifier>
+<identifier> ::= <letter> { <letter> | <digit> | "_" | "-" | "." }
+<size> ::= <nat>
+<nat> ::= <digit> { <digit> }
+<pattern> ::= <string>
+<string> ::= '"' { any-char-except-quote } '"'
 
 ## 4+ komandų pavyzdžiai (rekursija – `size`/`find`/`tree`)
-
+mkdir home/user/docs
+touch home/user/docs/report.txt 120
+find "report" in home
+size home
 
 *Papildomi naudojami projekto testuose: `ls`, `mv`, `rm`, `show`, `tree depth 2`.*
 
@@ -54,28 +74,8 @@
 
 
 
-<command> ::= "dump" "examples"
-            | "mkdir" <path>
-            | "touch" <path> <size>
-            | "ls" [<path>]
-            | "rm" <path>
-            | "mv" <path> "to" <path>
-            | "size" [<path>]
-            | "find" <pattern> ["in" <path>]
-            | "tree" [<path>] ["depth" <nat>]
-            | "show" <path>
-
-<path> ::= <name> { "/" <name> }
-<name> ::= <identifier>
-<identifier> ::= <letter> { <letter> | <digit> | "_" | "-" | "." }
-<size> ::= <nat>
-<nat> ::= <digit> { <digit> }
-<pattern> ::= <string>
-<string> ::= '"' { any-char-except-quote } '"'
 
 
-mkdir home/user/docs
-touch home/user/docs/report.txt 120
-find "report" in home
-size home
+
+
 
