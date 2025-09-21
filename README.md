@@ -28,25 +28,26 @@
 ---
 
 ## Grammar (BNF)
-`<command> ::= "dump" "examples"` <br>
-             `"mkdir" <path>` <br>
-             `"touch" <path> <size>` <br>
-             `"ls" [<path>]`<br>
-             `"rm" <path>`<br>
-             `"mv" <path> "to" <path>`<br>
-             `"size" [<path>]`<br>
-             `"find" <pattern> ["in" <path>]`<br>
-             `"tree" [<path>] ["depth" <nat>]`<br>
-             `"show" <path>`
+```bnf
+<command> ::= "dump" "examples"
+            | "mkdir" <path>
+            | "touch" <path> <size>
+            | "ls" [<path>]
+            | "rm" <path>
+            | "mv" <path> "to" <path>
+            | "size" [<path>]
+            | "find" <pattern> ["in" <path>]
+            | "tree" [<path>] ["depth" <nat>]
+            | "show" <path>
 
-- `<path> ::= <name> { "/" <name> }`
-- `<name> ::= <identifier>`
-- `<identifier> ::= <letter> { <letter> | <digit> | "_" | "-" | "." }`
-- `<size> ::= <nat>`
-- `<nat> ::= <digit> { <digit> }`
-- `<pattern> ::= <string>`
-- `<string> ::= '"' { any-char-except-quote } '"'`
-
+<path> ::= <name> { "/" <name> }
+<name> ::= <identifier>
+<identifier> ::= <letter> { <letter> | <digit> | "_" | "-" | "." }
+<size> ::= <nat>
+<nat> ::= <digit> { <digit> }
+<pattern> ::= <string>
+<string> ::= '"' { any-char-except-quote } '"'
+```
 ## 4+ komandų pavyzdžiai (rekursija – `size`/`find`/`tree`)
 - `mkdir home/user/docs`
 - `touch home/user/docs/report.txt 120`
