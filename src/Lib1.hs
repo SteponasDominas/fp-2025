@@ -1,26 +1,14 @@
--- src/Lib1.hs
 module Lib1
   ( Command(..)
-  , Path(..)
-  , (</>)
-  , p
+  , Path
   , keywords
   , examples
   ) where
 
-
-data Path = PEnd | PSeg String Path
-  deriving (Eq, Show)
-
-infixr 5 </>
-(</>) :: String -> Path -> Path
-(</>) seg rest = PSeg seg rest
-
-p :: [String] -> Path
-p = foldr PSeg PEnd
+-- Kelias modeliuojamas kaip segmentų sąrašas
+type Path = [String]
 
 -- Komandų ADT, atitinkantis README BNF
--- dump examples | mkdir/touch/ls/rm/mv | size/find | tree | show
 data Command
   = DumpExamples
   | MkDir Path
@@ -34,7 +22,6 @@ data Command
   | ShowPath Path
   deriving (Eq, Show)
 
--- Raktiniai žodžiai (naudinga testams ir parseriui)
 keywords :: [String]
 keywords =
   [ "dump","examples"
@@ -42,17 +29,16 @@ keywords =
   , "size","find","in","tree","depth","show"
   ]
 
--- Bent 8–10 pavyzdžių 
 examples :: [Command]
 examples =
-  [ MkDir (p ["home","user","docs"])
-  , Touch (p ["home","user","docs","report.txt"]) 120
+  [ MkDir ["home","user","docs"]
+  , Touch ["home","user","docs","report.txt"] 120
   , Ls Nothing
-  , Ls (Just (p ["home","user"]))
-  , SizeCmd (Just (p ["home"]))
-  , Find "report" (Just (p ["home"]))
-  , Tree (Just (p ["home"])) (Just 2)
-  , Mv (p ["home","user","docs","report.txt"]) (p ["home","user","docs","report-old.txt"])
-  , ShowPath (p ["home","user","docs"])
-  , Rm (p ["home","user","docs","report-old.txt"])
+  , Ls (Just ["home","user"])
+  , SizeCmd (Just ["home"])
+  , Find "report" (Just ["home"])
+  , Tree (Just ["home"]) (Just 2)
+  , Mv ["home","user","docs","report.txt"] ["home","user","docs","report-old.txt"]
+  , ShowPath ["home","user","docs"]
+  , Rm ["home","user","docs","report-old.txt"]
   ]
