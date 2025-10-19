@@ -208,55 +208,40 @@ pRm inputText =
 
 pMv :: Parser Lib1.Command
 pMv inputText =
-  case pKeyword "mv" inputText of
-    Right (_, afterMvKeyword) -> case requireSpaces afterMvKeyword of
-      Right (_, afterFirstSpace) -> case pPath afterFirstSpace of
-        Right (srcPath, afterSrcPath) -> case requireSpaces afterSrcPath of
-          Right (_, afterSecondSpace) -> case pKeyword "to" afterSecondSpace of
-            Right (_, afterToKeyword) -> case requireSpaces afterToKeyword of
-              Right (_, afterThirdSpace) -> case pPath afterThirdSpace of
-                Right (dstPath, remainingInput) -> Right (Lib1.Mv srcPath dstPath, remainingInput)
-                Left errorMsg -> Left errorMsg
-              Left errorMsg -> Left errorMsg
-            Left errorMsg -> Left errorMsg
-          Left errorMsg -> Left errorMsg
+  case and4 (pKeyword "mv") requireSpaces pPath requireSpaces inputText of
+    Right ((_,_,srcPath,_), afterSrcAndSpace) ->
+      case and3 (pKeyword "to") requireSpaces pPath afterSrcAndSpace of
+        Right ((_,_,dstPath), remainingInput) -> Right (Lib1.Mv srcPath dstPath, remainingInput)
         Left errorMsg -> Left errorMsg
-      Left errorMsg -> Left errorMsg
     Left errorMsg -> Left errorMsg
 
 
 pSize :: Parser Lib1.Command
 pSize inputText = case pKeyword "size" inputText of
   Right (_, afterSize) ->
-    case requireSpaces afterSize of
-      Right (_, afterSpace) -> case pKeyword "in" afterSpace of
-        Right (_, afterIn) -> case requireSpaces afterIn of
-          Right (_, afterInSpace) -> case pPath afterInSpace of
-            Right (parsedPath, remaining) -> Right (Lib1.SizeCmd (Just parsedPath), remaining)
-            Left err -> Left err
+    -- optional: in <path>
+    case and3 requireSpaces (pKeyword "in") requireSpaces afterSize of
+      Right ((_,_,_), afterInKwSpace) ->
+        case pPath afterInKwSpace of
+          Right (parsedPath, remaining) -> Right (Lib1.SizeCmd (Just parsedPath), remaining)
           Left err -> Left err
-        Left _ -> Right (Lib1.SizeCmd Nothing, afterSize)
       Left _ -> Right (Lib1.SizeCmd Nothing, afterSize)
   Left err -> Left err
 
 
 pFind :: Parser Lib1.Command
-pFind inputText = case pKeyword "find" inputText of
-  Right (_, afterFindKeyword) -> case requireSpaces afterFindKeyword of
-    Right (_, afterFindSpace) -> case pSeg afterFindSpace of
+pFind inputText =
+  case and2 (pKeyword "find") requireSpaces inputText of
+    Right (_, afterSpace) -> case pSeg afterSpace of
       Right (query, afterQuery) ->
-        case requireSpaces afterQuery of
-          Right (_, afterQuerySpace) -> case pKeyword "in" afterQuerySpace of
-            Right (_, afterInKeyword) -> case requireSpaces afterInKeyword of
-              Right (_, afterInSpace) -> case pPath afterInSpace of
-                Right (parsedPath, remainingInput) -> Right (Lib1.Find query (Just parsedPath), remainingInput)
-                Left errorMsg -> Left errorMsg
+        case and3 requireSpaces (pKeyword "in") requireSpaces afterQuery of
+          Right ((_,_,_), afterInKwSpace) ->
+            case pPath afterInKwSpace of
+              Right (parsedPath, remainingInput) -> Right (Lib1.Find query (Just parsedPath), remainingInput)
               Left errorMsg -> Left errorMsg
-            Left _ -> Right (Lib1.Find query Nothing, afterQuery)
           Left _ -> Right (Lib1.Find query Nothing, afterQuery)
       Left errorMsg -> Left errorMsg
     Left errorMsg -> Left errorMsg
-  Left errorMsg -> Left errorMsg
 
 
 
