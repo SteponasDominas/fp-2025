@@ -1,7 +1,7 @@
 # Functional Programming 2025 — Lab 1
 
 ## Domain: File System (FS)
-**Idėja.** Modeliuojame failų sistemos medį su katalogais ir failais. Tai natūraliai rekursyvus domenas: katalogas turi vaikų sąrašą (katalogus/failus), todėl operacijos kaip `size`, `find`, `tree` pereina visą poskyrį.
+**Idėja.** Modeliuojame failų sistemos medį su katalogais ir failais. Tai natūraliai rekursyvus domenas: katalogas turi vaikų sąrašą (katalogus/failus), todėl operacijos kaip `size`, `find`  pereina visą poskyrį.
 
 **Esybės**
 - `Dir` — katalogas (`name`, `children`)
@@ -20,7 +20,7 @@
 **Naudingos (domeno) komandos**
 - `size [<path>]` — **rekursyviai** sumuoja katalogo dydį
 - `find "<pattern>" [in <path>]` — **rekursyviai** ieško pavadinimuose
-- `tree [<path>] [depth <n>]` — **rekursyvus** atvaizdavimas iki gylio
+
 
 **Privaloma pagal užduotį**
 - `dump examples` — atspausdina pavyzdžines ADT reikšmes (sutampa su žemiau pateiktais pavyzdžiais).
@@ -32,29 +32,42 @@
 <command> ::= "dump" "examples"
             | "mkdir" <path>
             | "touch" <path> <size>
-            | "ls" [<path>]
+            | "ls" <path>?
             | "rm" <path>
             | "mv" <path> "to" <path>
-            | "size" [<path>]
-            | "find" <pattern> ["in" <path>]
-            | "tree" [<path>] ["depth" <nat>]
+            | "size" <path>?
+            | "find" <pattern> <in_clause>?
             | "show" <path>
 
-<path> ::= <name> { "/" <name> }
+<path> ::= <name>
+         | <name> "/" <path>
 <name> ::= <identifier>
-<identifier> ::= <letter> { <letter> | <digit> | "_" | "-" | "." }
+<identifier> ::= <letter>
+               | <letter> <identifier>
+               | <letter> <digit> <identifier>
+               | <letter> "_" <identifier>
+               | <letter> "-" <identifier>
+               | <letter> "." <identifier>
 <size> ::= <nat>
-<nat> ::= <digit> { <digit> }
+<nat> ::= <digit>
+        | <digit> <nat>
 <pattern> ::= <string>
-<string> ::= '"' { any-char-except-quote } '"'
+<string> ::= "\"" <string_content> "\""
+<string_content> ::= <any_char_except_quote>
+                   | <any_char_except_quote> <string_content>
+<in_clause> ::= "in" <path>
+
+<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+<any_char_except_quote> ::= <letter> | <digit> | " " | "!" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
 ```
-## 4+ komandų pavyzdžiai (rekursija – `size`/`find`/`tree`)
+## 4+ komandų pavyzdžiai (rekursija – `size`/`find`)
 - `mkdir home/user/docs`
 - `touch home/user/docs/report.txt 120`
 - `find "report" in home`
 - `size home`
 
-*Papildomi naudojami projekto testuose: `ls`, `mv`, `rm`, `show`, `tree depth 2`.*
+*Papildomi naudojami projekto testuose: `ls`, `mv`, `rm`, `show`.*
 
 ---
 
@@ -69,7 +82,6 @@
 | `mv <path> to <path>`                 | `Mv [String] [String]`               |
 | `size [<path>]`                       | `SizeCmd (Maybe [String])`           |
 | `find <pattern> [in <path>]`          | `Find String (Maybe [String])`       |
-| `tree [<path>] [depth <nat>]`         | `Tree (Maybe [String]) (Maybe Integer)` |
 | `show <path>`                         | `ShowPath [String]`                  |
 
 
