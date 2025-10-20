@@ -244,6 +244,35 @@ pFind inputText =
     Left errorMsg -> Left errorMsg
 
 
+pTree :: Parser Lib1.Command
+pTree inputText =
+  case pKeyword "tree" inputText of
+    Right (_, inputAfterTreeKeyword) ->
+      let parseOptionalInClause inputAfterTree =
+            case and3 requireSpaces (pKeyword "in") requireSpaces inputAfterTree of
+              Right ((_,_,_), inputAfterInKeywordAndSpaces) ->
+                case pPath inputAfterInKeywordAndSpaces of
+                  Right (pathSegments, inputAfterPath) -> Right (Just pathSegments, inputAfterPath)
+                  Left parseError                      -> Left parseError
+              Left _ -> Right (Nothing, inputAfterTree)
+          parseOptionalDepthClause inputAfterInClause =
+            case and3 requireSpaces (pKeyword "depth") requireSpaces inputAfterInClause of
+              Right ((_,_,_), inputAfterDepthKeywordAndSpaces) ->
+                case pNumber inputAfterDepthKeywordAndSpaces of
+                  Right (depthNumber, inputAfterNumber) -> Right (Just depthNumber, inputAfterNumber)
+                  Left parseError                        -> Left parseError
+              Left _ -> Right (Nothing, inputAfterInClause)
+
+      in case parseOptionalInClause inputAfterTreeKeyword of
+           Right (maybePath, inputAfterInPart) ->
+             case parseOptionalDepthClause inputAfterInPart of
+               Right (maybeDepth, remainingInput) ->
+                 Right (Lib1.Tree maybePath maybeDepth, remainingInput)
+               Left parseError -> Left parseError
+           Left parseError -> Left parseError
+
+    Left parseError -> Left parseError
+
 
 
 
@@ -266,6 +295,7 @@ pCommand =
   `orElse` pMv
   `orElse` pSize
   `orElse` pFind
+  `orElse` pTree
   `orElse` pShowPath
 
 
@@ -301,6 +331,12 @@ instance ToCliCommand Lib1.Command where
   toCliCommand (Lib1.Find query Nothing)         = "find " <> query
   toCliCommand (Lib1.Find query (Just pathSegments))
                                                  = "find " <> query <> " in " <> renderPath pathSegments
+
+  toCliCommand (Lib1.Tree maybePath maybeDepth)   =
+    unwords $ ["tree"]
+           ++ maybe [] (\pathSegments -> ["in", renderPath pathSegments]) maybePath
+           ++ maybe [] (\depthNum -> ["depth", show depthNum]) maybeDepth
+
   toCliCommand (Lib1.ShowPath pathSegments)       = "show " <> renderPath pathSegments
 
 
@@ -316,6 +352,8 @@ instance Eq Lib1.Command where
   Lib1.Mv srcA dstA                        == Lib1.Mv srcB dstB                         = srcA == srcB && dstA == dstB
   Lib1.SizeCmd maybePathA                  == Lib1.SizeCmd maybePathB                   = maybePathA == maybePathB
   Lib1.Find queryA maybePathA              == Lib1.Find queryB maybePathB               = queryA == queryB && maybePathA == maybePathB
+  Lib1.Tree maybePathA maybeDepthA         == Lib1.Tree maybePathB maybeDepthB          = maybePathA == maybePathB && maybeDepthA == maybeDepthB
+
   Lib1.ShowPath pathA                      == Lib1.ShowPath pathB                        = pathA == pathB
   _                                        == _                                         = False
 

@@ -18,6 +18,7 @@ data Command
   | Mv Path Path
   | SizeCmd (Maybe Path)
   | Find String (Maybe Path)
+  | Tree (Maybe Path) (Maybe Integer)
   | ShowPath Path
   deriving (Show)
 
@@ -25,7 +26,7 @@ keywords :: [String]
 keywords =
   [ "dump","examples"
   , "mkdir","touch","ls","rm","mv","to"
-  , "size","find","in","depth","show"
+  , "size","find","tree","in","depth","show"
   ]
 
 examples :: [Command]
@@ -38,5 +39,6 @@ examples =
   , Find "report" (Just ["home"])
   , Mv ["home","user","docs","report.txt"] ["home","user","docs","report-old.txt"]
   , ShowPath ["home","user","docs"]
+  , Tree (Just ["home"]) (Just 2)
   , Rm ["home","user","docs","report-old.txt"]
   ]

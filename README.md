@@ -20,6 +20,7 @@
 **Naudingos (domeno) komandos**
 - `size [<path>]` — **rekursyviai** sumuoja katalogo dydį
 - `find "<pattern>" [in <path>]` — **rekursyviai** ieško pavadinimuose
+- `tree [<path>] [depth <n>]` — **rekursyvus** atvaizdavimas iki gylio
 
 
 **Privaloma pagal užduotį**
@@ -37,6 +38,7 @@
             | "mv" <path> "to" <path>
             | "size" <path>?
             | "find" <pattern> <in_clause>?
+            | "tree" [<path>] ["depth" <nat>]
             | "show" <path>
 
 <path> ::= <name>
@@ -82,6 +84,7 @@
 | `mv <path> to <path>`                 | `Mv [String] [String]`               |
 | `size [<path>]`                       | `SizeCmd (Maybe [String])`           |
 | `find <pattern> [in <path>]`          | `Find String (Maybe [String])`       |
+| `tree [<path>] [depth <nat>]`         | `Tree (Maybe [String]) (Maybe Integer)` |
 | `show <path>`                         | `ShowPath [String]`                  |
 
 
