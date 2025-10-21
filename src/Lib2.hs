@@ -59,6 +59,15 @@ and4 firstParser secondParser thirdParser fourthParser inputText = case and3 fir
     Left errorMsg                  -> Left errorMsg
   Left errorMsg -> Left errorMsg
 
+-- Combine five parsers in sequence, returning a 5-tuple of results
+and5 :: Parser a -> Parser b -> Parser c -> Parser d -> Parser e -> Parser (a,b,c,d,e)
+and5 firstParser secondParser thirdParser fourthParser fifthParser inputText =
+  case and4 firstParser secondParser thirdParser fourthParser inputText of
+    Right ((valueA,valueB,valueC,valueD), inputAfterFour) -> case fifthParser inputAfterFour of
+      Right (valueE, inputAfterFive) -> Right ((valueA,valueB,valueC,valueD,valueE), inputAfterFive)
+      Left errorMsg                  -> Left errorMsg
+    Left errorMsg -> Left errorMsg
+
 
 -- pakeist rezultata uzdet fucija kokia
 mapParser :: (a -> b) -> Parser a -> Parser b
@@ -179,31 +188,25 @@ pMkDir inputText =
 
 pTouch :: Parser Lib1.Command
 pTouch inputText =
-  case and4 (pKeyword "touch") requireSpaces pPath requireSpaces inputText of
-    Right ((_,_,parsedPath,_), afterPathAndSpace) -> case pNumber afterPathAndSpace of
-      Right (num, remaining) -> Right (Lib1.Touch parsedPath num, remaining)
-      Left err               -> Left err
+  case and5 (pKeyword "touch") requireSpaces pPath requireSpaces pNumber inputText of
+    Right ((_,_,parsedPath,_,num), remaining) -> Right (Lib1.Touch parsedPath num, remaining)
     Left err -> Left err
 
 
 pLs :: Parser Lib1.Command
 pLs inputText = case pKeyword "ls" inputText of
   Right (_, afterKw) ->
-    case requireSpaces afterKw of
-      Right (_, afterSpace) -> case pPath afterSpace of
-        Right (parsedPath, remaining) -> Right (Lib1.Ls (Just parsedPath), remaining)
-        Left _                       -> Right (Lib1.Ls Nothing, afterKw)   -- "ls   " be kelio
-      Left _ -> Right (Lib1.Ls Nothing, afterKw)                            -- "ls"
+    case and2 requireSpaces pPath afterKw of
+      Right ((_, parsedPath), remaining) -> Right (Lib1.Ls (Just parsedPath), remaining)
+      Left _ -> Right (Lib1.Ls Nothing, afterKw)
   Left err -> Left err
 
 
 pRm :: Parser Lib1.Command
 pRm inputText =
-  case and2 (pKeyword "rm") requireSpaces inputText of
-    Right (_, afterSpace) -> case pPath afterSpace of
-      Right (parsedPath, remaining) -> Right (Lib1.Rm parsedPath, remaining)
-      Left err                     -> Left err
-    Left err -> Left err
+  case and3 (pKeyword "rm") requireSpaces pPath inputText of
+    Right ((_,_,parsedPath), remaining) -> Right (Lib1.Rm parsedPath, remaining)
+    Left err                            -> Left err
 
 
 pMv :: Parser Lib1.Command
@@ -215,62 +218,55 @@ pMv inputText =
         Left errorMsg -> Left errorMsg
     Left errorMsg -> Left errorMsg
 
-
 pSize :: Parser Lib1.Command
-pSize inputText = case pKeyword "size" inputText of
-  Right (_, afterSize) ->
-    -- optional: in <path>
-    case and3 requireSpaces (pKeyword "in") requireSpaces afterSize of
-      Right ((_,_,_), afterInKwSpace) ->
-        case pPath afterInKwSpace of
-          Right (parsedPath, remaining) -> Right (Lib1.SizeCmd (Just parsedPath), remaining)
-          Left err -> Left err
-      Left _ -> Right (Lib1.SizeCmd Nothing, afterSize)
-  Left err -> Left err
+pSize inputText =
+  case and5 (pKeyword "size") requireSpaces (pKeyword "in") requireSpaces pPath inputText of
+    Right ((_,_,_,_, pathSegments), remaining) -> Right (Lib1.SizeCmd (Just pathSegments), remaining)
+    Left _ -> case pKeyword "size" inputText of
+      Right (_, remaining) -> Right (Lib1.SizeCmd Nothing, remaining)
+      Left err             -> Left err
 
 
 pFind :: Parser Lib1.Command
 pFind inputText =
-  case and2 (pKeyword "find") requireSpaces inputText of
-    Right (_, afterSpace) -> case pSeg afterSpace of
-      Right (query, afterQuery) ->
-        case and3 requireSpaces (pKeyword "in") requireSpaces afterQuery of
-          Right ((_,_,_), afterInKwSpace) ->
-            case pPath afterInKwSpace of
-              Right (parsedPath, remainingInput) -> Right (Lib1.Find query (Just parsedPath), remainingInput)
-              Left errorMsg -> Left errorMsg
-          Left _ -> Right (Lib1.Find query Nothing, afterQuery)
-      Left errorMsg -> Left errorMsg
-    Left errorMsg -> Left errorMsg
+  case and5 (pKeyword "find") requireSpaces pSeg requireSpaces (pKeyword "in") inputText of
+    Right ((_,_,query,_,_), afterIn) ->
+      case and2 requireSpaces pPath afterIn of
+        Right ((_, pathSegments), remaining) -> Right (Lib1.Find query (Just pathSegments), remaining)
+        Left err -> Left err
+    Left _ ->  
+      case and3 (pKeyword "find") requireSpaces pSeg inputText of
+        Right ((_,_,query), remaining) -> Right (Lib1.Find query Nothing, remaining)
+        Left err -> Left err
 
 
 pTree :: Parser Lib1.Command
 pTree inputText =
   case pKeyword "tree" inputText of
     Right (_, inputAfterTreeKeyword) ->
-      let parseOptionalInClause inputAfterTree =
-            case and3 requireSpaces (pKeyword "in") requireSpaces inputAfterTree of
-              Right ((_,_,_), inputAfterInKeywordAndSpaces) ->
-                case pPath inputAfterInKeywordAndSpaces of
-                  Right (pathSegments, inputAfterPath) -> Right (Just pathSegments, inputAfterPath)
-                  Left parseError                      -> Left parseError
-              Left _ -> Right (Nothing, inputAfterTree)
-          parseOptionalDepthClause inputAfterInClause =
-            case and3 requireSpaces (pKeyword "depth") requireSpaces inputAfterInClause of
-              Right ((_,_,_), inputAfterDepthKeywordAndSpaces) ->
-                case pNumber inputAfterDepthKeywordAndSpaces of
-                  Right (depthNumber, inputAfterNumber) -> Right (Just depthNumber, inputAfterNumber)
-                  Left parseError                        -> Left parseError
-              Left _ -> Right (Nothing, inputAfterInClause)
+      let parseOptional :: Parser a -> Parser (Maybe a)
+          parseOptional parser currentInput =
+            case parser currentInput of
+              Right (value, remainingInput) -> Right (Just value, remainingInput)
+              Left  _                       -> Right (Nothing, currentInput)
 
-      in case parseOptionalInClause inputAfterTreeKeyword of
-           Right (maybePath, inputAfterInPart) ->
-             case parseOptionalDepthClause inputAfterInPart of
-               Right (maybeDepth, remainingInput) ->
-                 Right (Lib1.Tree maybePath maybeDepth, remainingInput)
+          parseInUnitPathSegments :: Parser Lib1.Path
+          parseInUnitPathSegments =
+            mapParser (\(_,_,_, pathSegments) -> pathSegments)
+                     (and4 requireSpaces (pKeyword "in") requireSpaces pPath)
+
+          parseDepthUnitNumber :: Parser Integer
+          parseDepthUnitNumber =
+            mapParser (\(_,_,_, depthNumber) -> depthNumber)
+                     (and4 requireSpaces (pKeyword "depth") requireSpaces pNumber)
+
+      in case parseOptional parseInUnitPathSegments inputAfterTreeKeyword of
+           Right (maybePathSegments, inputAfterInClause) ->
+             case parseOptional parseDepthUnitNumber inputAfterInClause of
+               Right (maybeDepthNumber, remainingInput) ->
+                 Right (Lib1.Tree maybePathSegments maybeDepthNumber, remainingInput)
                Left parseError -> Left parseError
            Left parseError -> Left parseError
-
     Left parseError -> Left parseError
 
 
