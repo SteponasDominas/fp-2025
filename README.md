@@ -172,4 +172,7 @@ Because persistence saves **the final state**, not the command history.
 
 
 
+<img width="1622" height="955" alt="Screenshot 2025-11-24 145317" src="https://github.com/user-attachments/assets/dc03e2fd-cbe9-4047-9213-720701408e06" />
+
+
 
