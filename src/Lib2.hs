@@ -36,12 +36,12 @@ runAll parser inputText =
 orElse :: Parser a -> Parser a -> Parser a
 orElse firstParser secondParser inputText = case firstParser inputText of
   Right parsed -> Right parsed
-  Left _       -> secondParser inputText
+  Left _       -> secondParser inputText 
 
 and2 :: Parser a -> Parser b -> Parser (a,b)
 and2 firstParser secondParser inputText = case firstParser inputText of
   Right (a, inputAfterFirst) -> case secondParser inputAfterFirst of
-    Right (b, inputAfterSecond) -> Right ((a,b), inputAfterSecond)
+    Right (b, inputAfterSecond) -> Right ((a,b), inputAfterSecond) 
     Left  err                  -> Left err
   Left err -> Left err
 

@@ -88,9 +88,87 @@
 | `show <path>`                         | `ShowPath [String]`                  |
 
 
+## State persistence
 
+In this project, the program keeps a `State` that stores all directories and files created during the session.  
+The program is persistent: the State is saved when the program exits and restored again when it starts.
 
+### How the State is saved
 
+The State has two parts:
+
+- `stDirs :: [Path]` – list of directory paths  
+- `stFiles :: [(Path, Integer)]` – list of files (path + size)
+
+To save the State, I convert it into a list of CLI commands:
+
+- each directory → `mkdir <path>`
+- each file → `touch <path> <size>`
+
+There are no other state fields that need to be mapped.  
+Commands like `mv`, `rm`, `size`, `show`, `find`, or `tree` do not need to be saved, because their effects are already reflected in the final `stDirs` and `stFiles`.  
+For example:
+
+- `mv` is represented by the final file/directory paths  
+- `rm` is represented by the fact that the removed paths no longer appear in the State  
+- `size`, `find`, `show`, `tree` do not modify the State at all
+
+All generated commands are written into the `state.txt` file.  
+When the program starts again, I read this file, parse each line back into a command, and apply them in order to recreate the same State.
+
+---
+
+### Example 1 
+
+**State:**
+```
+stDirs =
+[ ["home"]
+, ["home","user"]
+]
+
+stFiles =
+[ (["home","user","a.txt"], 10) ]
+```
+**Saved commands:**
+```
+mkdir home
+mkdir home/user
+touch home/user/a.txt 10
+```
+### Example 2
+
+Suppose the user executed these commands:
+```
+mkdir projects/lab3
+touch projects/lab3/notes.txt 50
+mkdir tmp
+touch tmp/x.txt 5
+mv tmp/x.txt to projects/lab3/x.txt
+rm tmp
+```
+The resulting **final State** is:
+```
+stDirs =
+[ ["projects"]
+, ["projects","lab3"]
+]
+
+stFiles =
+[ (["projects","lab3","notes.txt"], 50)
+, (["projects","lab3","x.txt"], 5)
+]
+```
+Even though the user used `mv` and `rm`, the saved command list still looks like this:
+```
+mkdir projects
+mkdir projects/lab3
+touch projects/lab3/notes.txt 50
+touch projects/lab3/x.txt 5
+```
+Because persistence saves **the final state**, not the command history.
+
+### Screenshots
 
 
 

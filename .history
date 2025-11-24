@@ -1,3 +1,9 @@
+tree
+tree
+touch projects/lab3/notes.txt 50
+mkdir projects/lab3
+ls
+mkdir home
 fsdf
 fsdf
 dump examples

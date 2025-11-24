@@ -1,0 +1,3 @@
+mkdir projects
+mkdir projects/lab3
+touch projects/lab3/notes.txt 50
