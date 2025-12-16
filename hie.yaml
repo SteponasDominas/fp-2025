@@ -1,0 +1,18 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: "fp2025:lib"
+    - path: "./app1"
+      component: "fp2025:exe:fp2025-one"
+    - path: "./app2"
+      component: "fp2025:exe:fp2025-two"
+    - path: "./app3"
+      component: "fp2025:exe:fp2025-three"
+    - path: "./app4-server"
+      component: "fp2025:exe:fp2025-four-server"
+    - path: "./app4-client"
+      component: "fp2025:exe:fp2025-four-client"
+    - path: "./test"
+      component: "fp2025:test:fp2024-test"
+
+
