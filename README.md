@@ -174,5 +174,36 @@ Because persistence saves **the final state**, not the command history.
 
 <img width="1622" height="955" alt="Screenshot 2025-11-24 145317" src="https://github.com/user-attachments/assets/dc03e2fd-cbe9-4047-9213-720701408e06" />
 
+## Client and Server
+
+The server is implemented using the WAI/Warp web framework. It accepts plain text commands via HTTP POST requests, executes the command, and returns the result as plain text in the HTTP response.
+
+### How to run
+
+#### Server
+
+Start the server:
+
+```bash
+stack run fp2025-four-server
+```
+
+## QuickCheck
+<img width="983" height="643" alt="lab4-quickcheck" src="https://github.com/user-attachments/assets/afd2989d-1830-4897-8917-63d6a88149c6" />
+
+## Client–Server
+<img width="1407" height="985" alt="lab4-client-server" src="https://github.com/user-attachments/assets/f93bec50-3e2b-4a74-bfb4-4b993d437a51" />
+<img width="1367" height="830" alt="lab4-client-server1" src="https://github.com/user-attachments/assets/3cd6792e-d347-4e6d-bc00-4e673a3dba36" />
+
+## Local
+<img width="1905" height="1107" alt="lab4-local" src="https://github.com/user-attachments/assets/da652d8d-66c7-4637-a15a-cc4238652204" />
+<img width="1858" height="1109" alt="lab4-local1" src="https://github.com/user-attachments/assets/49140f8c-8451-44b4-bb4f-4bc478f08cc9" />
+
+
+
+
+
+
+
 
 
