@@ -189,7 +189,8 @@ stack run fp2025-four-server
 ```
 
 ## QuickCheck
-<img width="983" height="643" alt="lab4-quickcheck" src="https://github.com/user-attachments/assets/afd2989d-1830-4897-8917-63d6a88149c6" />
+<img width="1295" height="932" alt="lab4-quick-check" src="https://github.com/user-attachments/assets/64a2cd8d-6b25-4b42-a70d-281e5f894a60" />
+
 
 ## Client–Server
 <img width="1407" height="985" alt="lab4-client-server" src="https://github.com/user-attachments/assets/f93bec50-3e2b-4a74-bfb4-4b993d437a51" />
@@ -198,6 +199,7 @@ stack run fp2025-four-server
 ## Local
 <img width="1905" height="1107" alt="lab4-local" src="https://github.com/user-attachments/assets/da652d8d-66c7-4637-a15a-cc4238652204" />
 <img width="1858" height="1109" alt="lab4-local1" src="https://github.com/user-attachments/assets/49140f8c-8451-44b4-bb4f-4bc478f08cc9" />
+
 
 
 
